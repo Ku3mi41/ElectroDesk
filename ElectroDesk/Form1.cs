@@ -62,7 +62,7 @@ namespace ElectroDesk
                 Stretched
             }
 
-            public static void Set(Uri uri, Style style)
+            public static void Set(Uri uri)
             {
                 Stream s = new WebClient().OpenRead(uri.ToString());
 
@@ -71,22 +71,19 @@ namespace ElectroDesk
                 img.Save(tempPath, System.Drawing.Imaging.ImageFormat.Bmp);
 
                 RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
-                if (style == Style.Stretched)
-                {
-                    key.SetValue(@"WallpaperStyle", 2.ToString());
-                    key.SetValue(@"TileWallpaper", 0.ToString());
-                }
 
-                if (style == Style.Centered)
+                int major = Environment.OSVersion.Version.Major;
+                int minor = Environment.OSVersion.Version.Minor;
+
+                key.SetValue(@"TileWallpaper", 0.ToString());
+
+                if ((major >= 6) && (minor >= 2))
+                {
+                    key.SetValue(@"WallpaperStyle", 0.ToString());
+                }
+                else
                 {
                     key.SetValue(@"WallpaperStyle", 1.ToString());
-                    key.SetValue(@"TileWallpaper", 0.ToString());
-                }
-
-                if (style == Style.Tiled)
-                {
-                    key.SetValue(@"WallpaperStyle", 1.ToString());
-                    key.SetValue(@"TileWallpaper", 1.ToString());
                 }
 
                 SystemParametersInfo(SPI_SETDESKWALLPAPER,
@@ -108,7 +105,7 @@ namespace ElectroDesk
 
             try
             {
-                Wallpaper.Set(link, Wallpaper.Style.Centered);
+                Wallpaper.Set(link);
             }
             catch (System.Net.WebException)
             {
@@ -204,6 +201,7 @@ namespace ElectroDesk
         {
             this.Close();
         }
+
 
     }
 }
